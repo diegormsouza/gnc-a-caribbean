@@ -42,8 +42,8 @@ Rmax = 0.6
 Gmin = -43.2
 Gmax = 6.7
 
-Bmin = -29.25
-Bmax = -64.65
+Bmin = -64.65
+Bmax = -29.25
 
 R[R > Rmax] = Rmax
 R[R < Rmin] = Rmin
@@ -51,8 +51,8 @@ R[R < Rmin] = Rmin
 G[G > Gmax] = Gmax
 G[G < Gmin] = Gmin
 
-B[B < Bmax] = Bmax # Inverted!
-B[B > Bmin] = Bmin # Inverted!
+B[B > Bmax] = Bmax
+B[B < Bmin] = Bmin 
 
 gamma_R = 1
 gamma_G = 1
@@ -63,12 +63,11 @@ R = ((R - Rmin) / (Rmax - Rmin)) ** (1/gamma_R)
 G = ((G - Gmin) / (Gmax - Gmin)) ** (1/gamma_G)
 B = ((B - Bmin) / (Bmax - Bmin)) ** (1/gamma_B) 
 
+# Invert the "Blue" component
+B = 1.0 - B
+
 # Create the RGB
 RGB = np.stack([R, G, B], axis=2)
-
-# Eliminate values outside the globe
-mask = (RGB == [R[0,0],G[0,0],B[0,0]]).all(axis=2)
-RGB[mask] = np.nan
 #-----------------------------------------------------------------------------------------------------------
 # Choose the plot size (width x height, in inches)
 plt.figure(figsize=(7,7)) 
