@@ -45,7 +45,7 @@ product_name = 'ABI-L2-CMIPF'
 # USER INPUT: BEGIN
 ###################
 
-# Desired extent (Min lon, Max lon, Min lat, Max lat)
+# Desired extent (Min lon, Min lat, Max lon, Max lat)
 extent = [-100.0, 0.00, -40.00, 40.00] 
 
 # Desired ABI band
