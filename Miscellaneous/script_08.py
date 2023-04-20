@@ -1,0 +1,102 @@
+#-----------------------------------------------------------------------------------------------------------
+# Training - Processing General GNC-A Products With Python - Demonstration: Blended TPW - NetCDF
+# Author: Diego Souza (INPE)
+#-----------------------------------------------------------------------------------------------------------
+
+# Required modules
+from netCDF4 import Dataset                 # Read / Write NetCDF4 files
+import matplotlib.pyplot as plt             # Plotting library
+import cartopy, cartopy.crs as ccrs         # Plot maps
+import cartopy.io.shapereader as shpreader  # Import shapefiles
+import cartopy.feature as cfeature          # Common drawing and filtering operations
+import numpy as np                          # Import the Numpy package
+from datetime import datetime, timedelta    # Library to convert julian day to dd-mm-yyyy
+import matplotlib.colors                    # Matplotlib colors
+
+#------------------------------------------------------------------------------------------------------
+
+# Open the file using the NetCDF4 library
+name = "VI-WKL-GLB_v2r1_j01_s20230411_e20230418_c202304190539050.nc"
+file = f'Samples//{name}'
+file = Dataset(file)
+
+# Select the extent [min. lon, min. lat, max. lon, max. lat]
+extent = [-100.0, 0.00, -40.00, 40.00]
+       
+# Reading lats and lons 
+lats = file.variables['latitude'][:]
+lons = file.variables['longitude'][:]
+ 
+# Latitude lower and upper index
+latli = np.argmin( np.abs( lats - extent[1] ) )
+latui = np.argmin( np.abs( lats - extent[3] ) )
+ 
+# Longitude lower and upper index
+lonli = np.argmin( np.abs( lons - extent[0] ) )
+lonui = np.argmin( np.abs( lons - extent[2] ) )
+ 
+# Extract the Sea Surface Temperature
+data = file.variables['NDVI_TOC'][ latui:latli , lonli:lonui ]
+
+#------------------------------------------------------------------------------------------------------
+
+# Getting the file time and date
+start = (name[name.find("_s")+2:name.find("_e")])
+end = (name[name.find("_e")+2:name.find("_c")])
+date_formatted = start[0:4] + '-' + start[4:6] + '-' + start[6:8] + ' to ' + end[0:4] + '-' + end[4:6] + '-' + end[6:8]
+date_file = end[0:4] + end[4:6] + end[6:8]
+
+# Print the formatted time and date
+print("NDVI File Date: ", date_formatted)
+
+#------------------------------------------------------------------------------------------------------
+
+# Choose the plot size (width x height, in inches)
+plt.figure(figsize=(8,6))
+
+# Use the Mercator projection in cartopy
+ax = plt.axes(projection=ccrs.PlateCarree())
+
+# Define the image extent
+img_extent = [extent[0], extent[2], extent[1], extent[3]]
+
+# Create a custom color scale:
+colors = ["#8f2723", "#8f2723", "#8f2723", "#8f2723", "#af201b", "#af201b", "#af201b", "#af201b", "#ce4a2e", "#ce4a2e", "#ce4a2e", "#ce4a2e",
+          "#df744a", "#df744a", "#df744a", "#df744a", "#f0a875", "#f0a875", "#f0a875", "#f0a875", "#fad398", "#fad398", "#fad398", "#fad398",
+          "#fff8ba", "#d8eda0", "#d8eda0", "#d8eda0", "#d8eda0", "#bddd8a", "#bddd8a", "#bddd8a", "#bddd8a", "#93c669", "#93c669", "#93c669", 
+          "#93c669", "#5da73e", "#5da73e", "#5da73e", "#5da73e", "#3c9427", "#3c9427", "#3c9427", "#3c9427", "#235117", "#235117", "#235117", 
+          "#235117"]
+cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", colors)
+cmap.set_over('#235117')
+cmap.set_under('#8f2723')
+vmin = 0.1
+vmax = 0.8
+
+# Add some various map elements to the plot to make it recognizable.
+ax.add_feature(cfeature.OCEAN)
+
+# Plot the image
+img = ax.imshow(data, vmin=vmin, vmax=vmax, origin='upper', extent=img_extent, cmap=cmap)
+
+# Add a shapefile
+shapefile = list(shpreader.Reader('ne_10m_admin_1_states_provinces.shp').geometries())
+ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='gray',facecolor='none', linewidth=0.3)
+
+# Add coastlines, borders and gridlines
+ax.coastlines(resolution='10m', color='black', linewidth=0.8)
+ax.add_feature(cartopy.feature.BORDERS, edgecolor='black', linewidth=0.5)
+gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=1.0, linestyle='--', linewidth=0.25, xlocs=np.arange(-180, 180, 10), ylocs=np.arange(-90, 90, 10), draw_labels=True)
+gl.top_labels = False
+gl.right_labels = False
+
+# Add a colorbar
+plt.colorbar(img, label='Normalized Difference Vegetation Index at Top of Canopy (TOC)', extend='both', orientation='horizontal', pad=0.05, fraction=0.05)
+
+# Add a title
+plt.title('JPSS VIIRS Normalized Difference Vegetation Index at Top of Canopy (TOC) 4km ' + date_formatted, fontweight='bold', fontsize=5, loc='left')
+plt.title('Region: ' + str(extent), fontsize=5, loc='right')
+
+#------------------------------------------------------------------------------------------------------
+
+# Show the image
+plt.show()
