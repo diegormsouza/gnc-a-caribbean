@@ -1,0 +1,29 @@
+# Downloading a ALPW sample file
+https://www.dropbox.com/s/1cwz8g7dimbzzyo/2021188120000_ADVECT_COMPOSITE.HDF?raw=1
+
+# Downloading a SST sample file
+!wget -c https://www.dropbox.com/s/4azzpqps0rk035t/coraltemp_v3.1_20210706.nc?raw=1
+
+# Downloading a SST Anomaly sample file
+!wget -c https://www.dropbox.com/s/gijirqb2r7wi260/ct5km_ssta_v3.1_20210706.nc?raw=1
+
+# Downloading a 7-Day SST Trend sample file
+!wget -c https://www.dropbox.com/s/1hk37ov4i5v9hve/ct5km_sst-trend-7d_v3.1_20210706.nc?raw=1
+
+# Downloading a Ocean Color sample file
+!wget -c https://www.dropbox.com/s/qcbh3bfwv3kofrl/VR1VCW_C2021187_C39_153120_165931-171344_184032-185444_202130-203418_220230-220937_VY00_edgemask_chlora.nc?raw=1
+
+# Downloading a Blended TPW sample file
+!wget -c https://www.dropbox.com/s/xqa99yo5bgvwxv1/BHP-TPW_v01r1_blend_s202304181501193_e202304190256136_c202304190320065.nc?raw=1
+
+# Downloading a Blended Rain Rate sample file
+!wget -c https://www.dropbox.com/s/9t50hk902cx0ht2/BHP-RR_v01r1_blend_s202304190402052_e202304191201136_c202304191229598.nc?raw=1
+
+# Downloading a NDVI sample file
+!wget -c https://www.dropbox.com/s/gfar20moji0db05/VI-WKL-GLB_v2r1_j01_s20230411_e20230418_c202304190539050.nc?raw=1
+
+# Downloading a Total Ozone (TOAST) sample file
+!wget -c https://www.dropbox.com/s/mhpm7zdao4ggcme/TOAST_Blended-grb_j01_CRIN_j01_OMPS_20230418.grb?raw=1
+
+# Downloading a Multimission Fire / Hotspots sample file
+!wget -c https://www.dropbox.com/s/d544yd5iur8u89b/INPE_MVF_202304192200.tar.gz?raw=1
