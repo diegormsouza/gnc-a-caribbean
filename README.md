@@ -3,3 +3,11 @@
 In this repository, you will find all the scripts used during the training.
 
 ![banner](https://user-images.githubusercontent.com/54595784/232803300-465ec569-97c7-4eed-ae7a-5c924acfb924.png)
+
+- **GOES** directory: Example scripts for the 1st and 2nd days
+
+- **NWP** directory: Example scripts for the 3rd and 4th days
+
+- **Animation** directory: Example script for the 5th day
+
+- **Miscellaneous** directory: Example script for the 5th and 6th days
