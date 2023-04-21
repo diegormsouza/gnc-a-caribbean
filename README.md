@@ -10,4 +10,4 @@ In this repository, you will find all the scripts used during the training.
 
 - **Animation** directory: Example script for the 5th day
 
-- **Miscellaneous** directory: Example script for the 5th and 6th days
+- **Miscellaneous** directory: Example scripts for the 5th and 6th days
