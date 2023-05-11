@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------------------------------------------------
-# Training - Processing General GNC-A Products With Python - Demonstration: NOAA Coral Reef Watch 5 km 7-Day SST Trend - NetCDF
+# Training - Processing General GNC-A Products With Python - Demonstration: NOAA Ocean Color - NetCDF
 # Author: Diego Souza (INPE)
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -16,14 +16,15 @@ import matplotlib.colors                    # Matplotlib colors
 #------------------------------------------------------------------------------------------------------
 
 # Open the file using the NetCDF4 library
-file = Dataset("Samples//ct5km_sst-trend-7d_v3.1_20210706.nc")
+file = Dataset("Samples//VR1VCW_C2021187_C39_153120_165931-171344_184032-185444_202130-203418_220230-220937_VY00_edgemask_chlora.nc")
 
 # Select the extent [min. lon, min. lat, max. lon, max. lat]
-extent = [-100.0, 0.00, -40.00, 40.00]
-       
+#extent = [-120.0, 0.0, -60.0, 44.0] # Full Eastern Caribbean Region (VY)
+extent = [-70.0, 10.0, -60.0, 20.0] # Subregion of the Full Eastern Caribbean Region (WY)
+
 # Reading lats and lons 
-lats = file.variables['lat'][:]
-lons = file.variables['lon'][:]
+lats = file.variables['rows'][:]
+lons = file.variables['cols'][:]
  
 # Latitude lower and upper index
 latli = np.argmin( np.abs( lats - extent[1] ) )
@@ -33,26 +34,23 @@ latui = np.argmin( np.abs( lats - extent[3] ) )
 lonli = np.argmin( np.abs( lons - extent[0] ) )
 lonui = np.argmin( np.abs( lons - extent[2] ) )
  
-# Extract the 7-Day SST Trend
-data = file.variables['trend'][ : , latui:latli , lonli:lonui ]
-
-# Return a reshaped matrix
-data = data.squeeze()
+# Extract the Ocean Color
+data = file.variables['chlor_a'][ 0 , 0 , latui:latli , lonli:lonui ]
 
 #------------------------------------------------------------------------------------------------------
 
 # Getting the file time and date
 add_seconds = int(file.variables['time'][0])
-date = datetime(1981,1,1,12) + timedelta(seconds=add_seconds)
+date = datetime(1970,1,1,12) + timedelta(seconds=add_seconds)
 date_formatted = date.strftime('%Y-%m-%d')
 
 # Print the formatted time and date
-print("7-Day SST Trend File Date: ", date_formatted)
+print("Ocean Color File Date: ", date_formatted)
 
 #------------------------------------------------------------------------------------------------------
 
 # Choose the plot size (width x height, in inches)
-plt.figure(figsize=(8,6))
+plt.figure(figsize=(10,10))
 
 # Use the Mercator projection in cartopy
 ax = plt.axes(projection=ccrs.PlateCarree())
@@ -61,20 +59,22 @@ ax = plt.axes(projection=ccrs.PlateCarree())
 img_extent = [extent[0], extent[2], extent[1], extent[3]]
 
 # Create a custom color scale:
-colors = ["#640064", "#6300f9", "#2259d3", "#0078ff", "#00bdfe", "#00ffff", 
-          "#0ba062", "#ffff00", "#ffbe00", "#ff5000", "#db0000", "#950000", 
-          "#640000"]
+colors = ["#84007c", "#1d00e1", "#0066ff", "#00ffe7", "#00ff00", "#ffff00", 
+          "#ff8a00", "#ff0000", "#bb0000", "#b46464"]
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", colors)
-cmap.set_over('#640000')
-cmap.set_under('#640064')
-vmin = -3.0
-vmax = 3.0
-
+cmap.set_over('#b46464')
+cmap.set_under('#84007c')
+vmin = 0.01
+vmax = 65.00
+    
 # Add some various map elements to the plot to make it recognizable.
 ax.add_feature(cfeature.LAND)
+ax.add_feature(cfeature.OCEAN, facecolor='black')
 
 # Plot the image
-img = ax.imshow(data, vmin=vmin, vmax=vmax, origin='upper', extent=img_extent, cmap=cmap)
+from matplotlib import colors, cm
+norm = colors.LogNorm(vmin, vmax, clip='False')
+img = ax.imshow(data, norm=norm,origin='upper', extent=img_extent, cmap=cmap)
 
 # Add a shapefile
 shapefile = list(shpreader.Reader('ne_10m_admin_1_states_provinces.shp').geometries())
@@ -83,16 +83,21 @@ ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='gray',facecolor='non
 # Add coastlines, borders and gridlines
 ax.coastlines(resolution='10m', color='black', linewidth=0.8)
 ax.add_feature(cartopy.feature.BORDERS, edgecolor='black', linewidth=0.5)
-gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=1.0, linestyle='--', linewidth=0.25, xlocs=np.arange(-180, 180, 10), ylocs=np.arange(-90, 90, 10), draw_labels=True)
+gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=1.0, linestyle='--', linewidth=0.25, xlocs=np.arange(-180, 180, 1), ylocs=np.arange(-90, 90, 1), draw_labels=True)
 gl.top_labels = False
 gl.right_labels = False
 
 # Add a colorbar
-plt.colorbar(img, label='SST Trend - Past 7 Days (°C/Week)', extend='both', orientation='horizontal', pad=0.05, fraction=0.05)
+from matplotlib.ticker import LogFormatter
+formatter = LogFormatter(10, labelOnlyBase=False) 
+plt.colorbar(img, label='Chlorophyll-a (mg/m³)', extend='both', orientation='horizontal', pad=0.05, fraction=0.05, format=formatter)
+
+#ticks = [0.01, 0.1, 0.0, 10, 20]
+#plt.colorbar(img, label='Chlorophyll-a (mg/m³)', extend='both', orientation='horizontal', pad=0.03, fraction=0.05)
 
 # Add a title
-plt.title('NOAA Coral Reef Watch Daily 5 km SST Trend (Past 7 Days)' + date_formatted, fontweight='bold', fontsize=8, loc='left')
-plt.title('Region: ' + str(extent), fontsize=8, loc='right')
+plt.title('NOAA-20 - VIIRS Chlorophyll Concentration (Chl-a) 750 m ' + date_formatted, fontweight='bold', fontsize=6, loc='left')
+plt.title('Region: ' + str(extent), fontsize=6, loc='right')
 
 #------------------------------------------------------------------------------------------------------
 
